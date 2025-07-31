@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL para desarrollo local
+  postgres:
+    image: postgres:17
+    container_name: student_attendance_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: student_attendance
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Next.js (para pruebas locales con Docker)
+  app:
+    build: .
+    container_name: student_attendance_app
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/student_attendance?schema=public
+      - NEXTAUTH_SECRET=desarrollo-secreto-local
+      - NEXTAUTH_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

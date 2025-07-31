@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  nombre        String
+  apellido      String
+  email         String   @unique
+  telefono      String?
+  departamento  String?
+  password      String
+  role          UserRole @default(PROFESOR)
+  activo        Boolean  @default(true)
+  fechaRegistro DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relaciones
+  materias      Materia[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  PROFESOR
+}
+
+model Materia {
+  id            String   @id @default(cuid())
+  nombre        String
+  codigo        String   @unique
+  descripcion   String?
+  activa        Boolean  @default(true)
+  fechaCreacion DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relaciones
+  profesorId    String
+  profesor      User        @relation(fields: [profesorId], references: [id], onDelete: Cascade)
+  estudiantes   Estudiante[]
+  asistencias   Asistencia[]
+
+  @@map("materias")
+}
+
+model Estudiante {
+  id            String   @id @default(cuid())
+  cedula        String
+  nombreCompleto String
+  email         String
+  fechaCarga    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relaciones
+  materiaId     String
+  materia       Materia      @relation(fields: [materiaId], references: [id], onDelete: Cascade)
+  asistencias   Asistencia[]
+
+  // Índice único para evitar duplicados por materia
+  @@unique([cedula, materiaId])
+  @@map("estudiantes")
+}
+
+model Asistencia {
+  id            String        @id @default(cuid())
+  fecha         DateTime      @db.Date
+  estado        EstadoAsistencia
+  observaciones String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relaciones
+  estudianteId  String
+  estudiante    Estudiante    @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  materiaId     String
+  materia       Materia       @relation(fields: [materiaId], references: [id], onDelete: Cascade)
+
+  // Índice único para evitar duplicados por fecha
+  @@unique([estudianteId, materiaId, fecha])
+  @@map("asistencias")
+}
+
+enum EstadoAsistencia {
+  presente
+  ausente
+  justificado
+}
