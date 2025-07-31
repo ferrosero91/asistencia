@@ -1,3 +1,18 @@
+# 🔐 CREDENCIALES DEL SISTEMA DE GESTIÓN DE ASISTENCIA
+
+## 👑 Super Administrador
 Email: admin@aunar.edu.co
 Contraseña: admin123
 Rol: SUPER_ADMIN
+Permisos: Acceso completo al sistema, gestión de usuarios, reportes globales
+
+## 👨‍🏫 Profesor de Prueba
+Email: profesor@aunar.edu.co
+Contraseña: 123456
+Rol: PROFESOR
+Permisos: Gestión de materias, estudiantes y asistencia
+
+## 📋 Notas Importantes
+- Cambiar las contraseñas después del primer login en producción
+- El super admin se crea automáticamente con el seed inicial
+- Para crear más usuarios, usar la interfaz de administración
