@@ -2,7 +2,7 @@
 FROM node:18-alpine AS base
 
 # Instalar dependencias necesarias
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat postgresql-client
 WORKDIR /app
 
 # Instalar dependencias
@@ -44,16 +44,19 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 # Copiar script de inicio
 COPY --from=builder /app/package.json ./package.json
 
+# Copiar y dar permisos al script ANTES de cambiar de usuario
+COPY start.sh ./
+RUN chmod +x start.sh
+
+# Cambiar propietario de archivos al usuario nextjs
+RUN chown -R nextjs:nodejs /app
+
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
-
-# Copiar script de inicio
-COPY start.sh ./
-RUN chmod +x start.sh
 
 # Script de inicio que ejecuta migraciones
 CMD ["./start.sh"]
